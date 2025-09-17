@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador Interactivo de Flujo de Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .flow-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .flow-step {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            padding: 2rem;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        .step-hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        .step-visible {
+            opacity: 1;
+            transform: scale(1);
+            position: static;
+        }
+        .option-button {
+            transition: all 0.2s ease;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+
+<div class="flow-container">
+    <div id="flow-content" class="relative w-full h-full p-4">
+        
+        <!-- Step: Initial -->
+        <div id="step-start" class="flow-step step-visible">
+            <div class="text-center">
+                <div class="text-5xl mb-4">👋</div>
+                <h2 class="text-xl font-semibold mb-2">¡Hola! Soy el asistente virtual de Ardicorp. ¿En qué puedo ayudarte hoy?</h2>
+                <p class="text-gray-600 mb-6">Elige una de las opciones principales para comenzar a explorar el flujo.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-reseller" class="option-button w-full bg-blue-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>🛒</span>
+                        <span>Comprar para revender</span>
+                    </button>
+                    <button data-target="step-user" class="option-button w-full bg-blue-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                         <span>💻</span>
+                        <span>Quiero usar</span>
+                    </button>
+                     <button data-target="step-info" class="option-button w-full bg-gray-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>ℹ️</span>
+                        <span>Información general</span>
+                    </button>
+                    <button data-target="step-operator" class="option-button w-full bg-gray-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>📞</span>
+                        <span>Contactar con un Asesor</span>
+                    </button>
+                     <button data-target="step-profile-info" class="option-button w-full bg-gray-500 text-white p-4 rounded-lg font-semibold col-span-1 sm:col-span-2 flex items-center justify-center space-x-2">
+                         <span>👤</span>
+                        <span>Acceder a mi Portal de Clientes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: Reseller Type -->
+        <div id="step-reseller" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">🛒 Comprar para revender: ¿Qué tipo de cliente eres?</h2>
+                <div class="space-y-4">
+                    <button data-target="step-ruc-validation" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Ferretería</button>
+                    <button data-target="step-ruc-validation-dist" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Distribuidor</button>
+                    <button data-target="step-ruc-validation-dist" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Cotizador</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: RUC Validation (Ferreteria) -->
+        <div id="step-ruc-validation" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">Ingresa RUC (Ferretería) y se valida en SAP. ¿Existe?</h2>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-ruc-exists" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold">Sí</button>
+                    <button data-target="step-ruc-not-exists-ferreteria" class="option-button w-full bg-red-500 text-white p-4 rounded-lg font-semibold">No</button>
+                </div>
+            </div>
+        </div>
+        
+         <!-- Step: RUC Validation (Distribuidor/Cotizador) -->
+        <div id="step-ruc-validation-dist" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">Ingresa RUC (Distribuidor/Cotizador) y se valida en SAP. ¿Existe?</h2>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-ruc-exists" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold">Sí</button>
+                    <button data-target="step-ruc-not-exists-dist" class="option-button w-full bg-red-500 text-white p-4 rounded-lg font-semibold">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: RUC Exists (Buttons) -->
+        <div id="step-ruc-exists" class="flow-step step-hidden">
+             <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4 text-green-600">✅ RUC Válido</h2>
+                <p class="text-gray-600 mb-6">Se ofrecen las siguientes opciones al cliente:</p>
+                <div class="space-y-4">
+                    <button data-target="step-download-app" class="option-button w-full bg-indigo-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>✅</span>
+                        <span>Descargar App aquí</span>
+                    </button>
+                    <button data-target="step-contact-vendedor" class="option-button w-full bg-blue-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>📲</span>
+                        <span>Contactar con tu Vendedor</span>
+                    </button>
+                    <button data-target="step-contact-supervisor" class="option-button w-full bg-purple-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <span>🧑‍💼</span>
+                        <span>Contactar con el Supervisor</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Download App -->
+        <div id="step-download-app" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">Descargar App</h2>
+                <p class="text-gray-600 mb-4">Elige tu plataforma de descarga:</p>
+                <div class="space-y-4 text-center">
+                    <a href="https://play.google.com/store/apps/details?id=com.example.app" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2" target="_blank" rel="noopener noreferrer">
+                        <span>📱</span>
+                        <span>Android App Store</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/example/id123456789" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2" target="_blank" rel="noopener noreferrer">
+                        <span>🍎</span>
+                        <span>iOS App Store</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Contact Vendedor -->
+        <div id="step-contact-vendedor" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">📲 Datos del Vendedor</h2>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg text-left">
+                    <p class="font-bold">Nombre:</p>
+                    <p class="mb-2">Juan Pérez</p>
+                    <p class="font-bold">Teléfono:</p>
+                    <p class="mb-2">+51 987 654 321</p>
+                    <p class="font-bold">Correo:</p>
+                    <p>juan.perez@empresa.com</p>
+                </div>
+                <a href="https://wa.me/51987654321" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 mt-6" target="_blank">
+                    <span>💬</span>
+                    <span>Contactar por WhatsApp</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Step: Contact Supervisor -->
+        <div id="step-contact-supervisor" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">🧑‍💼 Datos del Supervisor</h2>
+                <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 rounded-lg text-left">
+                    <p class="font-bold">Nombre:</p>
+                    <p class="mb-2">María García</p>
+                    <p class="font-bold">Teléfono:</p>
+                    <p class="mb-2">+51 912 345 678</p>
+                    <p class="font-bold">Correo:</p>
+                    <p>maria.garcia@empresa.com</p>
+                </div>
+                <a href="https://wa.me/51912345678" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 mt-6" target="_blank">
+                    <span>💬</span>
+                    <span>Contactar por WhatsApp</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Step: RUC Not Exists (Ferreteria) -->
+        <div id="step-ruc-not-exists-ferreteria" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-1 text-red-600">❌ RUC No Encontrado</h2>
+                <p class="text-gray-600 mb-6">Derivamos tu consulta a nuestro equipo.</p>
+                <a href="https://wa.me/51972969129" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 mt-6" target="_blank">
+                    <span>➡️</span>
+                    <span>Derivar al WhatsApp Call Center</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Step: RUC Not Exists (Distribuidor) -->
+        <div id="step-ruc-not-exists-dist" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-1 text-red-600">❌ RUC No Encontrado</h2>
+                <p class="text-gray-600 mb-6">Derivamos tu consulta a nuestro equipo.</p>
+                <a href="https://wa.me/51943903278" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 mt-6" target="_blank">
+                    <span>➡️</span>
+                    <span>Derivar al WhatsApp Showroom</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Step: User Type -->
+        <div id="step-user" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">💻 Quiero usar: ¿Eres empresa o persona natural?</h2>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-user-empresa" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">🏢 Empresa privada</button>
+                    <button data-target="step-user-natural" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">🙋 Persona natural</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: User Empresa -->
+        <div id="step-user-empresa" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">🏢 Empresa Privada</h2>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg">
+                    <p class="font-bold">➡️ Derivar a WhatsApp KAM 998114864</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: User Natural -->
+        <div id="step-user-natural" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">🙋 Persona Natural</h2>
+                <p class="mb-2">📍 Se solicita Ciudad y Distrito.</p>
+                <p class="mb-6">🔍 Luego, se pide ingresar producto (Nombre o SKU).</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-product-sku" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Ingresó SKU</button>
+                    <button data-target="step-product-keyword" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Ingresó Palabra Clave</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: Product SKU -->
+        <div id="step-product-sku" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">SKU Ingresado</h2>
+                <p class="mb-6">✅ Se muestra el nombre del producto y se verifica disponibilidad. ¿Disponible?</p>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-product-available" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold">Sí</button>
+                    <button data-target="step-product-not-available" class="option-button w-full bg-red-500 text-white p-4 rounded-lg font-semibold">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Product Keyword -->
+        <div id="step-product-keyword" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">Palabra Clave Ingresada</h2>
+                <p class="text-gray-600 mb-2">📂 Se solicita Categoría + Tipo, Color o Característica.</p>
+                <p class="text-gray-600 mb-2">📋 Se muestra una lista de productos relacionados.</p>
+                <p class="text-gray-600 mb-6">👉 Usuario selecciona un producto y se verifica disponibilidad. ¿Disponible?</p>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-product-available" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold">Sí</button>
+                    <button data-target="step-product-not-available" class="option-button w-full bg-red-500 text-white p-4 rounded-lg font-semibold">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Product Available -->
+        <div id="step-product-available" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold text-green-600 mb-4">✅ Producto Disponible</h2>
+                <p class="text-gray-600 mb-4">Se aplica un algoritmo de priorización para encontrar las mejores opciones:</p>
+                <div class="space-y-2 text-left bg-gray-50 p-4 rounded-lg border">
+                    <p><strong>Filtro 1:</strong> Compras últimos 15 días</p>
+                    <p><strong>Filtro 2:</strong> Distrito</p>
+                    <p><strong>Filtro 3:</strong> Cantidad de compra</p>
+                    <p><strong>Filtro 4:</strong> Categoría del ferretero (Gold++, Gold+, etc.)</p>
+                </div>
+                <p class="text-gray-600 mt-4 font-semibold">🏪 Se muestran hasta 4 ferreterías priorizadas al comprador.</p>
+            </div>
+        </div>
+        
+        <!-- Step: Product Not Available -->
+        <div id="step-product-not-available" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold text-red-600 mb-4">❌ Producto No Disponible</h2>
+                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
+                    <p class="font-bold">➡️ Derivar al WhatsApp Showroom</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: General Info -->
+        <div id="step-info" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">ℹ️ Información General</h2>
+                <p class="text-gray-600 mb-6">Elige la información que deseas consultar:</p>
+                <div class="space-y-4">
+                    <a href="https://acortar.link/EUh58w" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2" target="_blank" rel="noopener noreferrer" download>
+                        <span>📥</span>
+                        <span>Descargar Catálogo de Productos</span>
+                    </a>
+                    <button data-target="step-contact-hours" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2">
+                        <span>⏰</span>
+                        <span>Ver Canales y Horarios de Atención</span>
+                    </button>
+                    <button data-target="step-location" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2">
+                        <span>📍</span>
+                        <span>Ubicación</span>
+                    </button>
+                    <a href="https://b2bdev.ardiles.pe/atencion-cliente/preguntas-frecuentes" target="_blank" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium flex items-center justify-center space-x-2">
+                        <span>❓</span>
+                        <span>Preguntas Frecuentes</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: Location -->
+        <div id="step-location" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">📍 Ubicación</h2>
+                <div class="space-y-4 text-left">
+                     <div class="bg-gray-100 p-4 rounded-lg border">
+                         <h3 class="font-bold text-gray-800 mb-2">Dirección</h3>
+                         <p class="text-sm text-gray-600">Av. Santa María 230 Urb. La Aurora - Ate, Lima</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=Av.Santa+Mar%C3%ADa+230+Urb.+La+Aurora+-+Ate,+Lima" target="_blank" class="option-button flex-1 w-full bg-blue-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2" rel="noopener noreferrer">
+                        <span>🗺️</span>
+                        <span>Google Maps</span>
+                    </a>
+                    <a href="https://www.waze.com/ul?q=Av.Santa+Mar%C3%ADa+230+Urb.+La+Aurora+-+Ate,+Lima" target="_blank" class="option-button flex-1 w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2" rel="noopener noreferrer">
+                        <span>🚗</span>
+                        <span>Waze</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Contact Hours -->
+        <div id="step-contact-hours" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">⏰ Canales y Horarios de Atención</h2>
+                <div class="space-y-4 text-left">
+                     <div class="bg-gray-100 p-4 rounded-lg border">
+                         <h3 class="font-bold text-gray-800 mb-2">Horario</h3>
+                         <ul class="text-sm text-gray-600 space-y-1">
+                            <li>Lunes - Viernes: 9:00 AM - 5:00 PM</li>
+                            <li>Sábado: 9:00 AM - 12:00 PM</li>
+                        </ul>
+                    </div>
+                     <div class="bg-gray-100 p-4 rounded-lg border">
+                         <h3 class="font-bold text-gray-800 mb-2">Ventas y Cotizaciones</h3>
+                         <ul class="text-sm text-gray-600 space-y-1">
+                            <li><i class="fas fa-phone mr-2 text-green-500"></i>Teléfono: (01) 319 - 0660</li>
+                            <li><i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp: 943 903 278, 947 647 163</li>
+                            <li><i class="fas fa-envelope mr-2 text-green-500"></i>Email: ventas@ardicorp.pe</li>
+                        </ul>
+                    </div>
+                     <div class="bg-gray-100 p-4 rounded-lg border">
+                         <h3 class="font-bold text-gray-800 mb-2">Servicio al Cliente</h3>
+                         <ul class="text-sm text-gray-600 space-y-1">
+                            <li><i class="fas fa-phone mr-2 text-green-500"></i>Teléfono: (01) 319 - 0660</li>
+                            <li><i class="fab fa-whatsapp mr-2 text-green-500"></i>WhatsApp: 972 969 129</li>
+                            <li><i class="fas fa-envelope mr-2 text-green-500"></i>Email: servicio.clientes@ardicorp.pe</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Operator -->
+        <div id="step-operator" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">📞 Contactar con un Asesor: Selecciona el área</h2>
+                <div class="space-y-3">
+                    <button data-target="step-operator-whatsapp-derivation" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium" data-whatsapp-number="51943903278">Ventas / Cotizaciones</button>
+                    <button data-target="step-operator-whatsapp-derivation" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium" data-whatsapp-number="51972969129">Atención al Cliente</button>
+                    <button data-target="step-operator-whatsapp-derivation" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium" data-whatsapp-number="51981145493">Cobranza</button>
+                    <button data-target="step-operator-whatsapp-derivation" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium" data-whatsapp-number="51981145493">Contacto con Recepción</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: Operator Derivation to WhatsApp -->
+        <div id="step-operator-whatsapp-derivation" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">Derivación a Operador</h2>
+                <p class="text-gray-600 mb-6">Serás redirigido a un chat de WhatsApp con el área seleccionada.</p>
+                <a href="#" id="whatsapp-link" class="option-button w-full bg-green-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2" target="_blank">
+                    <span>💬</span>
+                    <span>Contactar por WhatsApp</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Step: Profile Info (New step) -->
+        <div id="step-profile-info" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">👤 Acceder a mi Portal de Clientes</h2>
+                <p class="text-gray-600 mb-6">Al ingresar a tu perfil de cliente, podrás:</p>
+                <ul class="text-left text-gray-700 space-y-2 mb-6 max-w-sm mx-auto">
+                    <li class="flex items-center space-x-2"><i class="fas fa-truck-fast text-blue-500"></i><span>Creación y seguimiento de pedidos.</span></li>
+                    <li class="flex items-center space-x-2"><i class="fas fa-clipboard-list text-blue-500"></i><span>Creación y seguimiento de reclamos.</span></li>
+                    <li class="flex items-center space-x-2"><i class="fas fa-file-invoice text-blue-500"></i><span>Consultar el estado de tu cuenta.</span></li>
+                </ul>
+                <a href="https://b2bdev.ardiles.pe/distribuidores/login" target="_blank" class="option-button w-full bg-blue-500 text-white p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 mt-4">
+                    <span>➡️</span>
+                    <span>Ir al portal de cliente</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Step: Profile -->
+        <div id="step-profile" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">👤 Perfil del Cliente: ¿Qué deseas consultar?</h2>
+                <div class="space-y-3">
+                    <button data-target="step-profile-result" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium">📑 Estado de cuenta</button>
+                    <button data-target="step-profile-result" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium">📦 Seguimiento de pedidos</button>
+                    <button data-target="step-profile-claims" class="option-button w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-medium">📝 Reclamos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step: Profile Claims -->
+         <div id="step-profile-claims" class="flow-step step-hidden">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold mb-6">📝 Reclamos: ¿Qué acción deseas realizar?</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button data-target="step-profile-result" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Registrar reclamo</button>
+                    <button data-target="step-profile-result" class="option-button w-full bg-gray-200 text-gray-800 p-4 rounded-lg font-medium">Consultar reclamo</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step: Profile Result -->
+        <div id="step-profile-result" class="flow-step step-hidden">
+             <div class="text-center">
+                <h2 class="text-xl font-semibold mb-4">Consulta de Perfil</h2>
+                 <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-lg">
+                    <p class="font-bold">✅ Se muestra la información solicitada.</p>
+                    <p>(Estado de cuenta, tracking, formulario/lista de reclamos, etc.)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="p-4 bg-gray-50 border-t rounded-b-xl flex justify-center space-x-4">
+        <button id="back-button" class="bg-gray-400 text-white font-bold py-2 px-6 rounded-full hover:bg-gray-500 transition-colors" style="display: none;">
+            Atrás
+        </button>
+        <button id="home-button" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-full hover:bg-gray-700 transition-colors">
+            Volver al Inicio
+        </button>
+    </div>
+</div>
+
+<script>
+    const flowContent = document.getElementById('flow-content');
+    const allSteps = flowContent.querySelectorAll('.flow-step');
+    const backButton = document.getElementById('back-button');
+    const homeButton = document.getElementById('home-button');
+    let historyStack = ['step-start'];
+
+    const renderStep = (targetId) => {
+        allSteps.forEach(step => {
+            step.classList.add('step-hidden');
+            step.classList.remove('step-visible');
+        });
+        const targetStep = document.getElementById(targetId);
+        if (targetStep) {
+            targetStep.classList.remove('step-hidden');
+            targetStep.classList.add('step-visible');
+        }
+        updateButtonVisibility();
+    };
+
+    const navigateToStep = (targetId) => {
+        historyStack.push(targetId);
+        renderStep(targetId);
+    };
+    
+    const goBack = () => {
+        if (historyStack.length > 1) {
+            historyStack.pop();
+            const previousStepId = historyStack[historyStack.length - 1];
+            renderStep(previousStepId);
+        }
+    };
+    
+    const goToHome = () => {
+        historyStack = ['step-start'];
+        renderStep('step-start');
+    };
+
+    const updateButtonVisibility = () => {
+        backButton.style.display = historyStack.length > 1 ? 'inline-block' : 'none';
+    };
+
+    flowContent.addEventListener('click', (e) => {
+        const target = e.target.closest('button[data-target]');
+        if (target) {
+            const targetId = target.getAttribute('data-target');
+            if (targetId === 'step-operator-whatsapp-derivation') {
+                const whatsappNumber = target.getAttribute('data-whatsapp-number');
+                document.getElementById('whatsapp-link').href = `https://wa.me/${whatsappNumber}`;
+            }
+            navigateToStep(targetId);
+        }
+    });
+
+    homeButton.addEventListener('click', goToHome);
+    backButton.addEventListener('click', goBack);
+</script>
+
+</body>
+</html>
