@@ -71,6 +71,7 @@
             pointer-events: none;
             transition: all 0.3s ease-in-out;
             z-index: 999;
+            font-size: 0.95rem; /* Ajuste del tamaño de letra solo para el pop-up */
         }
 
         #chatbot-popup.popup-visible {
@@ -420,10 +421,12 @@
                 <!-- Step: User Empresa -->
                 <div id="step-user-empresa" class="flow-step step-hidden">
                     <div class="flow-message">
-                        <p class="text-sm">🏢 Empresa Privada</p>
+                        <p class="text-sm">🏢 Empresa Privada: Se derivará su consulta a un asesor.</p>
                     </div>
                     <div class="flow-text-info mt-4">
-                        <p class="font-bold text-sm">➡️ Derivar a WhatsApp KAM 998114864</p>
+                        <a href="https://wa.me/51998114864" class="option-button bg-green-500" target="_blank">
+                            <span>➡️ Contactar por WhatsApp (KAM)</span>
+                        </a>
                     </div>
                 </div>
 
@@ -716,4 +719,3 @@
 
 </body>
 </html>
-
